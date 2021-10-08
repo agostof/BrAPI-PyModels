@@ -51,10 +51,6 @@ class Genotypes(BaseModel):
     class Config:
         json_encoders = JSON_ENCODERS
 
-# class AdditionalInfo(BaseModel):
-#     class Config:
-#         extra = Extra.allow
-#     __root__: str
         
 class GenotypeMatrixResult(BaseModel):
     variantsAsRows: bool = Field(
