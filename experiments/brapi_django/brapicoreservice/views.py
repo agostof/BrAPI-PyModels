@@ -43,7 +43,6 @@ def serverinfo(request):
         IndexPagination, WSMIMEDataTypes, ServerInfoResponse)
 
     pagination = IndexPagination(currentPage = 0, pageSize=1000, totalCount=1, totalPages=1)
-    metadata = Metadata(datafiles=[], status=[], pagination=pagination)
     services = []
     services.append(
         # Lists Server information (Core Module)
@@ -59,7 +58,7 @@ def serverinfo(request):
                     serverDescription='BrAPI Django Server Testbed.',
                     calls=services)
 
-    pagination = IndexPagination(currentPage = 0, pageSize=1000)
+    
     metadata = Metadata(datafiles=[], status=[], pagination=pagination)
 
     response = ServerInfoResponse(metadata=metadata, result=serverinfo)
