@@ -60,29 +60,25 @@ class GenotypeMatrixResult(BaseModel):
     variantsAsRows: bool = Field(
         None, description='Determine variant matrix orientation', example=True
     )
-#     annotations: List[str] = Field(
-#         None, description='Callsets contained in the matrix', example=[[0, 1],[0, 2]]
-#     )
+
     annotationsCallset: Optional[Dict[str, List[str]]] = Field(
         None, description='arbitrary annotations for each callset in array format', 
         example={'countryOfOrigin':['INDIA','JAPAN']}
     )
+
     annotationsVariants: Optional[Dict[str, List[str]]] = Field(
         None, description='arbitrary annotations for each variant in an array format', 
         example={'putativeFunction':['STOP','FRAMESHIFT']}
     )
-    #Optional[Dict[str, AdditionalInfo]] = Field(
-    #    None, description='Additional arbitrary info', example={}
-    #)
+
     callsets: List[str] = Field(
         None, description='Callsets contained in the matrix', example=[[0, 1],[0, 2]]
     )
-#     data: Genotypes = Field(
-#         None, description='genotype data', example=[[0, 1],[0, 2]]
-#     )
+
     genotypes: TypedArray[Literal['int8']] = Field(
         None, description='genotype data', example=[[0, 1],[0, 2]]
     )
+
     class Config:
         json_encoders = JSON_ENCODERS
 
