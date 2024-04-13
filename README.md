@@ -3,7 +3,7 @@
 
 ## BrAPI-PyModels: Python-based Breeder's API (BrAPI) data models
 
-Implementation of the [BrAPI v2.0](https://brapi.org/) specification for Python using [pydantic](https://pydantic-docs.helpmanual.io/) data models. Note: *This project is a sibling to [BrAPI-FastAPI](https://github.com/agostof/BrAPI-FastAPI), BrAPI implementation server stubs*.
+Implementation of the [BrAPI v2.0](https://brapi.org/) and 2.1 specification for Python using [pydantic](https://pydantic-docs.helpmanual.io/) data models. Note: *This project is a sibling to [BrAPI-FastAPI](https://github.com/agostof/BrAPI-FastAPI), BrAPI implementation server stubs*.
 * Includes models for [Core](models/brapi_v2/core), [Genotyping](models/brapi_v2/genotyping), [Germplasm](models/brapi_v2/germplasm), and [Phenotyping](models/brapi_v2/phenotyping).
 * Use models to create a [BrAPI client](client/barebones_brapi_client.py) (a.k.a *BrAPP*) or to create a client library.
 * Integrate models with other Python frameworks.
@@ -46,3 +46,5 @@ OpenApi-compatible codegen tools were used to generate the foundational data mod
 
 These redundant Pydantic models occur because the BrAPI OpenAPI spec files were processed independently.
 ~~Ideally, they should be consolidated as part of the Core module or in a *commons* package.~~ Check the [modelgen_utils](modelgen_utils) directory for additional details.
+
+The V2.1 model was an attempt to automate a lot of the code-gen cleanup. Josh L.S. (jdl232 at cornell.edu) tried to merge all the duplicates that were functionally identical via script, but it missed quite a few instances so far, and the code may still have several objects where ClassName#m and ClassName#n are identical, but were separated by the autogenerator. The fix to this is to delete ClassName#m and replace its mentions with ClassName#n, which is what the 'autodeduplication' tools in the v_2.1_autogen folder attemt to do automatically.

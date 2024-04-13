@@ -1,0 +1,7 @@
+Step 1. copy contents of this folder to the same level as the api folder
+Step 2. Call ./denumerate_dir.sh api  to renumber all numbered classes' numbers, as these classes are the same contents, just with different names.
+Step 3. Clean up any remaining numbered classes (Denumerate.java lists a couple names where there are multiple different entities with the same 'name' and different numbers)
+Step 4. Run remove_class_instances to remove all but one copy of duplicated class names. Note: Preserved copy is in alphabecical order. We want 'core' to have the residual if core has both.
+This allows importing core to get all the entities that may or may not continue to exist in each model file.
+
+Optional: Each file is now model.py in the folder of its type, you can spruce it up by renaming them to <foldername>.py and flattening the structure
