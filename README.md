@@ -47,4 +47,11 @@ OpenApi-compatible codegen tools were used to generate the foundational data mod
 These redundant Pydantic models occur because the BrAPI OpenAPI spec files were processed independently.
 ~~Ideally, they should be consolidated as part of the Core module or in a *commons* package.~~ Check the [modelgen_utils](modelgen_utils) directory for additional details.
 
-The V2.1 model was an attempt to automate a lot of the code-gen cleanup. Josh L.S. (jdl232 at cornell.edu) tried to merge all the duplicates that were functionally identical via script, but it missed quite a few instances so far, and the code may still have several objects where ClassName#m and ClassName#n are identical, but were separated by the autogenerator. The fix to this is to delete ClassName#m and replace its mentions with ClassName#n, which is what the 'autodeduplication' tools in the v_2.1_autogen folder attemt to do automatically.
+## BrAPI v2.1 Status and Notes
+
+The V2.1 model was an attempt to automate a lot of the code-gen cleanup so future BrAPI spec updates could be easily integrated.
+
+Josh L.S. (jdl232 at cornell.edu) tried to merge all the duplicates that were functionally identical via script. The script however missed quite a few instances of duplicate classes. The *auto-deduplication code* differentiated classes by adding a sequential numerical suffix e.g `ClassName1`, `ClassName2`, to the class names. The code may still have several objects where `ClassName#m` and `ClassName#n` are identical, but were separated as different classes by the *autogenerator*. The fix to this is to delete `ClassName#m` and replace its mentions with `ClassName#n`, which is what the [auto-deduplication tools](modelgen_utils/dedup_tools) in the v_2.1_autogen folder attempt to do automatically.
+
+There were also changes in how Pydantic models are specified when this work was underway. The models provided can be used as a start, but changes might be needed for your specific usecase.
+
