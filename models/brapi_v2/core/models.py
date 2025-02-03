@@ -11,7 +11,7 @@ from datetime import date, datetime
 from enum import Enum
 from typing import Dict, List, Optional, Union
 
-from pydantic import AnyUrl, BaseModel, Extra, Field
+from pydantic import AnyUrl, BaseModel, Field, RootModel, validator
 
 
 class Contact(BaseModel):
@@ -47,8 +47,8 @@ class Contact(BaseModel):
     )
 
 
-class Context(BaseModel):
-    __root__: List[AnyUrl] = Field(
+class Context(RootModel):
+    root: List[AnyUrl] = Field(
         ...,
         description='The JSON-LD Context is used to provide JSON-LD definitions to each field in a JSON object. By providing an array of context file urls, a BrAPI response object becomes JSON-LD compatible.  \n\nFor more information, see https://w3c.github.io/json-ld-syntax/#the-context',
         example=['https://brapi.org/jsonld/context/metadata.jsonld'],
@@ -133,14 +133,6 @@ class EnvironmentParameter(BaseModel):
         description='URI pointing to an ontology class for the parameter value',
         example='ENVO:00002262',
     )
-
-
-class AdditionalInfo(BaseModel):
-    class Config:
-        extra = Extra.allow
-
-    __root__: str
-
 
 class ListTypes(Enum):
     germplasm = 'germplasm'
@@ -315,7 +307,8 @@ class Season(BaseModel):
         description="Name of the season. ex. 'Spring', 'Q2', 'Season A', etc.",
         example='Spring',
     )
-    seasonDbId: str = Field(
+    # made optional for compatibility with ImageBreed and Breedbase
+    seasonDbId: Optional[str] = Field(
         ...,
         description="The ID which uniquely identifies a season. For backward compatibility it can be a string like '2012', '1957-2004'",
         example='Spring_2018',
@@ -513,8 +506,8 @@ class IndexPagination(BasePagination):
     )
 
 
-class Position(BaseModel):
-    __root__: List[float] = Field(
+class Position(RootModel):
+    root: List[float] = Field(
         ...,
         description='A single position',
         example=[-76.506042, 42.417373, 123],
@@ -687,8 +680,8 @@ class StudyTypesResponseResult(BaseModel):
     )
 
 
-class ExternalReferences(BaseModel):
-    __root__: List[ExternalReferencesInner] = Field(
+class ExternalReferences(RootModel):
+    root: List[ExternalReferencesInner] = Field(
         ...,
         description='An array of external reference ids. These are references to this piece of data in an external system. Could be a simple string or a URI.',
         example=[
@@ -707,7 +700,7 @@ class ExternalReferences(BaseModel):
 
 
 class ListBaseFields(BaseModel):
-    additionalInfo: Optional[Dict[str, AdditionalInfo]] = Field(
+    additionalInfo: Optional[dict] = Field(
         None, description='Additional arbitrary info', example={}
     )
     dateCreated: Optional[datetime] = Field(
@@ -801,7 +794,7 @@ class OntologyReference(BaseModel):
 
 
 class PersonNewRequest(BaseModel):
-    additionalInfo: Optional[Dict[str, AdditionalInfo]] = Field(
+    additionalInfo: Optional[dict] = Field(
         None, description='Additional arbitrary info'
     )
     description: Optional[str] = Field(
@@ -878,7 +871,7 @@ class ProgramNewRequest(BaseModel):
     abbreviation: Optional[str] = Field(
         None, description='An abbreviation which represents this program', example='P1'
     )
-    additionalInfo: Optional[Dict[str, AdditionalInfo]] = Field(
+    additionalInfo: Optional[dict] = Field(
         None, description='Additional arbitrary info'
     )
     commonCropName: Optional[str] = Field(
@@ -941,7 +934,7 @@ class ProgramSearchRequest(
 
 
 class ScaleBaseClass(BaseModel):
-    additionalInfo: Optional[Dict[str, AdditionalInfo]] = Field(
+    additionalInfo: Optional[dict] = Field(
         None, description='Additional arbitrary info'
     )
     dataType: Optional[TraitDataType] = None
@@ -987,7 +980,7 @@ class StudyNewRequest(BaseModel):
     active: Optional[bool] = Field(
         None, description='Is this study currently active', example=True
     )
-    additionalInfo: Optional[Dict[str, AdditionalInfo]] = Field(
+    additionalInfo: Optional[dict] = Field(
         None, description='Additional arbitrary info'
     )
     commonCropName: Optional[str] = Field(
@@ -1012,6 +1005,11 @@ class StudyNewRequest(BaseModel):
         description='A URL to the human readable documentation of this object',
         example='https://wiki.brapi.org',
     )
+    @validator('documentationURL', pre=True, always=True)
+    def set_empty_string_to_none(cls, v):
+        if v == '':
+           return None
+        return v
     endDate: Optional[datetime] = Field(
         None,
         description='The date the study ends\n\nMIAPPE V1.1 (DM-15) End date of study - Date and, if relevant, time when the experiment ended',
@@ -1051,7 +1049,10 @@ class StudyNewRequest(BaseModel):
         description='MIAPPE V1.1 (DM-25) Observation unit description - General description of the observation units in the study.',
         example='Observation units consisted in individual plots themselves consisting of a row of 15 plants at a density of approximately six plants per square meter.',
     )
-    seasons: Optional[List[str]] = Field(
+    # TODO: Fix incosistent use of season as as strings vs a Season Object
+    seasons: Optional[List[Union[str, None]]] = Field(
+    #seasons: Optional[List[str]] = Field(
+    #seasons: Optional[List[Season]] = Field(
         None,
         description='List of seasons over which this study was performed.',
         example=['Spring_2018'],
@@ -1096,7 +1097,7 @@ class StudyNewRequest(BaseModel):
 
 
 class TraitBaseClass(BaseModel):
-    additionalInfo: Optional[Dict[str, AdditionalInfo]] = Field(
+    additionalInfo: Optional[dict] = Field(
         None, description='Additional arbitrary info'
     )
     alternativeAbbreviations: Optional[List[str]] = Field(
@@ -1152,7 +1153,7 @@ class TrialNewRequest(BaseModel):
     active: Optional[bool] = Field(
         None, description='Is this trail currently active', example=True
     )
-    additionalInfo: Optional[Dict[str, AdditionalInfo]] = Field(
+    additionalInfo: Optional[dict] = Field(
         None, description='Additional arbitrary info'
     )
     commonCropName: Optional[str] = Field(
@@ -1217,8 +1218,8 @@ class Trait(TraitBaseClass):
     )
 
 
-class LinearRing(BaseModel):
-    __root__: List[Position] = Field(
+class LinearRing(RootModel):
+    root: List[Position] = Field(
         ...,
         description='An array of at least four positions where the first equals the last',
         example=[
@@ -1253,8 +1254,8 @@ class PointGeometry(BaseModel):
     )
 
 
-class Polygon(BaseModel):
-    __root__: List[LinearRing] = Field(
+class Polygon(RootModel):
+    root: List[LinearRing] = Field(
         ...,
         description='An array of linear rings',
         example=[
@@ -1284,7 +1285,7 @@ class ListDetails(ListSummary, ListNewRequest):
 
 
 class MethodBaseClass(BaseModel):
-    additionalInfo: Optional[Dict[str, AdditionalInfo]] = Field(
+    additionalInfo: Optional[dict] = Field(
         None, description='Additional arbitrary info'
     )
     bibliographicalReference: Optional[str] = Field(
@@ -1393,7 +1394,7 @@ class Method(MethodBaseClass):
 
 
 class VariableBaseClass(BaseModel):
-    additionalInfo: Optional[Dict[str, AdditionalInfo]] = Field(
+    additionalInfo: Optional[dict] = Field(
         None, description='Additional arbitrary info'
     )
     commonCropName: Optional[str] = Field(
@@ -1475,79 +1476,79 @@ class Metadata(MetadataBase):
 
 
 class CommonCropNamesResponse(BaseModel):
-    _context: Optional[Context] = Field(None, alias='@context')
+    context: Optional[Context] = Field(None, alias='@context')
     metadata: Metadata
     result: CommonCropNamesResponseResult
 
 
 class ListsListResponse(BaseModel):
-    _context: Optional[Context] = Field(None, alias='@context')
+    context: Optional[Context] = Field(None, alias='@context')
     metadata: Metadata
     result: ListsListResponseResult
 
 
 class ListsSingleResponse(BaseModel):
-    _context: Optional[Context] = Field(None, alias='@context')
+    context: Optional[Context] = Field(None, alias='@context')
     metadata: Metadata
     result: ListDetails
 
 
 class ListResponse(BaseModel):
-    _context: Optional[Context] = Field(None, alias='@context')
+    context: Optional[Context] = Field(None, alias='@context')
     metadata: Metadata
     result: ListDetails
 
 
 class PersonSingleResponse(BaseModel):
-    _context: Optional[Context] = Field(None, alias='@context')
+    context: Optional[Context] = Field(None, alias='@context')
     metadata: Metadata
     result: Person
 
 
 class ProgramSingleResponse(BaseModel):
-    _context: Optional[Context] = Field(None, alias='@context')
+    context: Optional[Context] = Field(None, alias='@context')
     metadata: Metadata
     result: Program
 
 
 class Field202AcceptedSearchResponse(BaseModel):
-    _context: Optional[Context] = Field(None, alias='@context')
+    context: Optional[Context] = Field(None, alias='@context')
     metadata: Optional[Metadata] = None
     result: Optional[Field202AcceptedSearchResponseResult] = None
 
 
 class SeasonListResponse(BaseModel):
-    _context: Optional[Context] = Field(None, alias='@context')
+    context: Optional[Context] = Field(None, alias='@context')
     metadata: Metadata
     result: SeasonListResponseResult
 
 
 class SeasonSingleResponse(BaseModel):
-    _context: Optional[Context] = Field(None, alias='@context')
+    context: Optional[Context] = Field(None, alias='@context')
     metadata: Metadata
     result: Season
 
 
 class ServerInfoResponse(BaseModel):
-    _context: Optional[Context] = Field(None, alias='@context')
+    context: Optional[Context] = Field(None, alias='@context')
     metadata: Metadata
     result: ServerInfo
 
 
 class StudySingleResponse(BaseModel):
-    _context: Optional[Context] = Field(None, alias='@context')
+    context: Optional[Context] = Field(None, alias='@context')
     metadata: Metadata
     result: Study
 
 
 class StudyTypesResponse(BaseModel):
-    _context: Optional[Context] = Field(None, alias='@context')
+    context: Optional[Context] = Field(None, alias='@context')
     metadata: Metadata
     result: StudyTypesResponseResult
 
 
 class TrialSingleResponse(BaseModel):
-    _context: Optional[Context] = Field(None, alias='@context')
+    context: Optional[Context] = Field(None, alias='@context')
     metadata: Metadata
     result: Trial
 
@@ -1572,7 +1573,7 @@ class LocationNewRequest(BaseModel):
     abbreviation: Optional[str] = Field(
         None, description='An abbreviation which represents this location', example='L1'
     )
-    additionalInfo: Optional[Dict[str, AdditionalInfo]] = Field(
+    additionalInfo: Optional[dict] = Field(
         None, description='Additional arbitrary info', example={}
     )
     coordinateDescription: Optional[str] = Field(
@@ -1694,25 +1695,25 @@ class LocationSearchRequest(
 
 
 class PersonListResponse(BaseModel):
-    _context: Optional[Context] = Field(None, alias='@context')
+    context: Optional[Context] = Field(None, alias='@context')
     metadata: Metadata
     result: PersonListResponseResult
 
 
 class ProgramListResponse(BaseModel):
-    _context: Optional[Context] = Field(None, alias='@context')
+    context: Optional[Context] = Field(None, alias='@context')
     metadata: Metadata
     result: ProgramListResponseResult
 
 
 class StudyListResponse(BaseModel):
-    _context: Optional[Context] = Field(None, alias='@context')
+    context: Optional[Context] = Field(None, alias='@context')
     metadata: Metadata
     result: StudyListResponseResult
 
 
 class TrialListResponse(BaseModel):
-    _context: Optional[Context] = Field(None, alias='@context')
+    context: Optional[Context] = Field(None, alias='@context')
     metadata: Metadata
     result: TrialListResponseResult
 
@@ -1724,7 +1725,7 @@ class Location(LocationNewRequest):
 
 
 class LocationSingleResponse(BaseModel):
-    _context: Optional[Context] = Field(None, alias='@context')
+    context: Optional[Context] = Field(None, alias='@context')
     metadata: Metadata
     result: Location
 
@@ -1734,6 +1735,6 @@ class LocationListResponseResult(BaseModel):
 
 
 class LocationListResponse(BaseModel):
-    _context: Optional[Context] = Field(None, alias='@context')
+    context: Optional[Context] = Field(None, alias='@context')
     metadata: Metadata
     result: LocationListResponseResult
